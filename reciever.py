@@ -183,7 +183,10 @@ for i in range(len(bits_grouped_by_8)):
     print(chr(int(bits_grouped_by_8[i])))
     ascii_text += chr(int(bits_grouped_by_8[i]))
 
-print(ascii_text)
+
+
+
+
 #--------------#
 #some plotting things for debugging
 #--------------#

@@ -1,31 +1,49 @@
-import numpy as np
-from matplotlib import pyplot as plt
+from reciever_modules.py import *
 
-#Create I and Q input lists
-input = open('input.txt', 'r')
-input_values = input.readlines()
-Iinput = []
-Qinput = []
-for string_value in input_values: 
-    Iinput.append(float(string_value.strip()))
-    Qinput.append(0)
+def main(): 
+    recieved_sig_vals = read_file_float('input.txt')
 
-#Create I and Q preamble lists
-preamble = open('preamble.txt', 'r')
-preamble_values = preamble.readlines()
-preamble_values = np.array(preamble_values)
-preamble_values = np.char.replace(preamble_values, 'i', 'j').astype(np.complex128)
-Ipreamble = []
-Qpreamble = []
-for complex_value in preamble_values: 
-    Ipreamble.append(complex_value.real)
-    Qpreamble.append(complex_value.imag)
+    #Down conversion
+    f_c = 20
+    T = 1/100
+    num_samples = 3000
+
+    I_down_converted = down_convert(recieved_sig_vals, f_c, T, num_samples, 'cos')
+
+    Q_down_converted = down_convert(recieved_sig_vals, f_c, T, num_samples, 'sin')
+
+    #Low pass filter
+    f_cutoff = 5.1
+    f_s = 100
+    order = 1
+
+    lpf = create_lpf(f_cutoff, f_s, order)
+
+    I_filtered = apply_lpf(I_down_converted, lpf)
+    Q_filtered = apply_lpf(Q_down_converted, lpf)
+
+    #Downsample
+    sym_transmission_freq = 10
+
+    I_downsampled = downsample(I_filtered, sym_transmission_freq)
+
+    Q_downsampled = downsample(Q_filtered, sym_transmission_freq)
+
+    #Correlate 
+    n = 50
+    if not correlate(I_downsampled, Q_downsampled, 'preamble.txt', n): 
+        print("Error: not correlated properly")
+        return -1
+
+    #Extract bits from singals
+    num_samples = 300
+    bits = demodulate(I_downsampled, Q_downsampled, num_samples)
+
+    #Translate bits to ascii
+    rtn_txt = ascii_to_text(bits)
+
+    return rtn_txt
 
 
-#x = np.arange(3000)
-#y = values
-#plt.title("Input Values")
-#plt.xlabel("sample num")
-#plt.ylabel("input value")
-#plt.plot(x,y)
-#plt.show()
+if __name__ == '__main__': 
+    main()
