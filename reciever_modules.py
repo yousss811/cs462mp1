@@ -1,5 +1,7 @@
 import numpy as np
-from scipy.signal import butter, lfilter
+from matplotlib import pyplot as plt
+from scipy.fft import fft 
+from scipy.signal import butter, lfilter, freqz
 
 #Reads every line in the file and returns each line as an element in an array 
 #Input: file name as string
@@ -63,12 +65,13 @@ def five_sig_figs(x, sig = 5):
 #Input: I and Q signals as float arrays, pre-amble as string array, int num samples to check
 #Output: bool - true if matching else false
 def correlate(I_signal_array, Q_signal_array, preamble, n): 
+    preamble_array = read_file_str(preamble)
     for i in range(n-1): 
         if Q_signal_array[i] < 0: 
             IQstr = '{}{}i'.format(five_sig_figs(I_signal_array[i], Q_signal_array[i]))
         else: 
             IQstr = '{}+{}i'.format(five_sig_figs(I_signal_array[i]), five_sig_figs(Q_signal_array[i]))
-        if IQstr != preamble[i]: 
+        if IQstr != preamble_array[i]: 
             return False
     return True
 
@@ -115,12 +118,19 @@ def ascii_to_text(bit_array):
     ascii_text = ''
     for i in range(len(bit_array)):
         if int(bit_array[i]) > 0b110000:
-            print("Error: bits not correctly demodulated (not an ascii val)")
             return False
         ascii_text += chr(int(bit_array[i]))
     return ascii_text
 
-
+#Plot a signal and its fft
+def plot_signal_and_fft(signal_as_array): 
+    plt.subplot(1,2,1)
+    plt.plot(signal_as_array)
+    plt.subplot(1,2,2)
+    signal_fft = fft(signal_as_array)
+    w, h = freqz(signal_fft)
+    plt.plot(w, h)
+    plt.show()
 
 
 

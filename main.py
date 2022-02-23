@@ -12,6 +12,9 @@ def main():
 
     Q_down_converted = down_convert(recieved_sig_vals, f_c, T, num_samples, 'sin')
 
+    plot_signal_and_fft(I_down_converted)
+    plot_signal_and_fft(Q_down_converted)
+
     #Low pass filter
     f_cutoff = 5.1
     f_s = 100
@@ -40,7 +43,12 @@ def main():
     bits = demodulate(I_downsampled, Q_downsampled, num_samples)
 
     #Translate bits to ascii
-    rtn_txt = ascii_to_text(bits)
+    rtn_txt = 'NOT THE TEXT'
+    if ascii_to_text(bits): 
+        rtn_txt = ascii_to_text(bits)
+    else: 
+        print("Error: bits not correctly demodulated (not an ascii val)")
+        #return -1
 
     print(rtn_txt)
     return rtn_txt
