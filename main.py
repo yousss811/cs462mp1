@@ -8,12 +8,18 @@ def main():
     T = 1/100
     num_samples = 3000
 
+    #plotting dbg
+    plot_signal_and_fft(recieved_sig_vals, num_samples, T)
+    #done dbg
+
     I_down_converted = down_convert(recieved_sig_vals, f_c, T, num_samples, 'cos')
 
     Q_down_converted = down_convert(recieved_sig_vals, f_c, T, num_samples, 'sin')
 
-    plot_signal_and_fft(I_down_converted)
-    plot_signal_and_fft(Q_down_converted)
+    #plotting dbg
+    plot_signal_and_fft(I_down_converted, num_samples, T)
+    plot_signal_and_fft(Q_down_converted, num_samples, T)
+    #done dbg
 
     #Low pass filter
     f_cutoff = 5.1
@@ -25,12 +31,22 @@ def main():
     I_filtered = apply_lpf(I_down_converted, lpf)
     Q_filtered = apply_lpf(Q_down_converted, lpf)
 
+    #plotting dbg
+    plot_signal_and_fft(I_filtered, num_samples, T)
+    plot_signal_and_fft(Q_filtered, num_samples, T)
+    #done dbg
+
     #Downsample
     sym_transmission_freq = 10
 
     I_downsampled = downsample(I_filtered, sym_transmission_freq)
 
     Q_downsampled = downsample(Q_filtered, sym_transmission_freq)
+
+    #plotting dbg
+    plot_signal_and_fft(I_downsampled, int(num_samples/10), T*10)
+    plot_signal_and_fft(Q_downsampled, int(num_samples/10), T*10)
+    #done dbg
 
     #Correlate 
     n = 50

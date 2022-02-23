@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.fft import fft 
-from scipy.signal import butter, lfilter, freqz
+from scipy.fft import fft, fftfreq 
+from scipy.signal import butter, lfilter
 
 #Reads every line in the file and returns each line as an element in an array 
 #Input: file name as string
@@ -123,16 +123,24 @@ def ascii_to_text(bit_array):
     return ascii_text
 
 #Plot a signal and its fft
-def plot_signal_and_fft(signal_as_array): 
+def plot_signal_and_fft(signal_as_array, num_samples, T): 
     plt.subplot(1,2,1)
-    plt.plot(signal_as_array)
+    plt.plot(signal_as_array, 'r')
     plt.subplot(1,2,2)
     signal_fft = fft(signal_as_array)
-    w, h = freqz(signal_fft)
-    plt.plot(w, h)
+    frequencies = fftfreq(num_samples, T)
+    plt.plot(frequencies, signal_fft, 'b')
+
     plt.show()
 
 
-
+#plot2 = plt.figure(2)
+#plt.subplot(2,2,1)
+#plt.plot(I, 'r')
+#plt.subplot(2,2,2)
+#plt.plot(fft(I), 'b')
+#plt.subplot(2,2,3)
+#w1, h1 = freqz(I)
+#plt.plot(w1, 20*np.log10(np.abs(h1)), 'g')
 
 
