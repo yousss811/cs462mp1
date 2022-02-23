@@ -1,6 +1,4 @@
 import numpy as np
-from matplotlib import pyplot as plt
-from scipy.fft import fft, ifft, fftfreq
 from scipy.signal import butter, lfilter
 
 #Reads every line in the file and returns each line as an element in an array 
@@ -11,7 +9,7 @@ def read_file_float(file):
     return np.array(file.readlines(), float)
 
 #Similar to above, but returns as string array
-def read_file_float(file): 
+def read_file_str(file): 
     file = open(file, 'r')
     return np.array(file.readlines(), str)
    
@@ -32,10 +30,11 @@ def down_convert(signal_array, f_c, T, num_samples, convert_func_str):
 #Output: array of tuples with tuple[0] is numerator and tuple[1] is denominator of filter
 def create_lpf(f_cutoff, f_s, order):
     f_nyq = .5*f_s
-    norm_cuttoff_freq = (2 * f_cutoff) / fs
+    norm_cuttoff_freq = (2 * f_cutoff) / f_s
 
     lpf_numerator, lpf_denominator = butter(order, norm_cuttoff_freq)
-    lpf = [[lpf_numerator[i], lpf_denominator[i]] for i in range(len(max(lpf_numerator, lpf_denominator)))]
+    lpf = [[lpf_numerator[i], lpf_denominator[i]] for i in range(max(len(lpf_numerator), len(lpf_denominator)))]
+    return lpf
 
 #Apply lpf on signal
 #Input: signal, lpf as outputted by create_lpf 
@@ -49,23 +48,26 @@ def apply_lpf(signal_array, lpf):
 #Input: symbol transmission freq in Hz as int, signal as float array
 #Output: downsampled signal as float array 
 def downsample(signal_array, sym_transmission_freq):
-    return [signal_array[i] for i in range(len(signal_array)) if i%10 == 0]
+    return [signal_array[i] for i in range(len(signal_array)) if i%sym_transmission_freq == 0]
 
 #small helper function to round to 5 sig figs
 def five_sig_figs(x, sig = 5):
     if x == 0: 
         return 0
-    return round(float(x), sig-int(np.floor(np.log10(np.abs(x))))-1)
+    new_sig = int(sig - int(np.floor(np.log10(np.abs(x)))) - 1)
+    x = float(x)
+    rtn_val = round(x, new_sig)
+    return rtn_val
 
 #Correlate: check first n samples vs provided pre-amble
 #Input: I and Q signals as float arrays, pre-amble as string array, int num samples to check
 #Output: bool - true if matching else false
 def correlate(I_signal_array, Q_signal_array, preamble, n): 
-    for i in range(n): 
+    for i in range(n-1): 
         if Q_signal_array[i] < 0: 
             IQstr = '{}{}i'.format(five_sig_figs(I_signal_array[i], Q_signal_array[i]))
         else: 
-            IQstr = '{}+{}i'.format(five_sig_figs(I_signal_array[i], Q_signal_array[i]))
+            IQstr = '{}+{}i'.format(five_sig_figs(I_signal_array[i]), five_sig_figs(Q_signal_array[i]))
         if IQstr != preamble[i]: 
             return False
     return True
@@ -112,6 +114,9 @@ def demodulate(I_signal_array, Q_signal_array, num_samples):
 def ascii_to_text(bit_array):
     ascii_text = ''
     for i in range(len(bit_array)):
+        if int(bit_array[i]) > 0b110000:
+            print("Error: bits not correctly demodulated (not an ascii val)")
+            return False
         ascii_text += chr(int(bit_array[i]))
     return ascii_text
 

@@ -1,4 +1,4 @@
-from reciever_modules.py import *
+from reciever_modules import *
 
 def main(): 
     recieved_sig_vals = read_file_float('input.txt')
@@ -33,7 +33,7 @@ def main():
     n = 50
     if not correlate(I_downsampled, Q_downsampled, 'preamble.txt', n): 
         print("Error: not correlated properly")
-        return -1
+        #return -1
 
     #Extract bits from singals
     num_samples = 300
@@ -42,6 +42,7 @@ def main():
     #Translate bits to ascii
     rtn_txt = ascii_to_text(bits)
 
+    print(rtn_txt)
     return rtn_txt
 
 
