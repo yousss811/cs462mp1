@@ -103,7 +103,7 @@ def correlate(I_signal_array, Q_signal_array, preamble, n):
             IQstr = '{}+{}i'.format(five_sig_figs(I_signal_array[i]), five_sig_figs(Q_signal_array[i]))
 
         if five_sig_figs(I_signal_array[i]) == .48284: 
-            print("OK WTF")
+            print("OK Working")
         if IQstr == preamble_array[preamble_index]: 
             preamble_index +=1
             if preamble_index == 1: 
