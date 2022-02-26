@@ -102,7 +102,7 @@ def correlate(I_signal_array, Q_signal_array, preamble, n):
         else: 
             IQstr = '{}+{}i'.format(five_sig_figs(I_signal_array[i]), five_sig_figs(Q_signal_array[i]))
 
-        if five_sig_figs(I_signal_array[i]) == .48284: 
+        if .48283 < five_sig_figs(I_signal_array[i]) < .48285: 
             print("OK Working")
         if IQstr == preamble_array[preamble_index]: 
             preamble_index +=1
@@ -190,7 +190,6 @@ def plot_signal_and_fft(signal_as_array, num_samples, T):
     signal_fft = fft(signal_as_array)
     frequencies = fftfreq(num_samples, T)
     plt.plot(frequencies, signal_fft, 'b')
-
     return curr_plt
 def show_plots(): 
     plt.show()
