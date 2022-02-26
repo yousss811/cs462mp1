@@ -64,7 +64,7 @@ def main():
     #plotting dbg
     plot_I_down_sampled = plot_signal_and_fft(I_downsampled, int(num_samples/10), T*10)
     plot_Q_down_sampled = plot_signal_and_fft(Q_downsampled, int(num_samples/10), T*10)
-    show_plots()
+    #show_plots()
     #done dbg
 
     #Correlate 
