@@ -10,8 +10,8 @@ def main():
     num_samples = 3000
 
     #plotting dbg
-    init_plots()
-    plot_input_values = plot_signal_and_fft(recieved_sig_vals, num_samples, T)
+    #init_plots()
+    #plot_input_values = plot_signal_and_fft(recieved_sig_vals, num_samples, T)
     #done dbg
 
     I_down_converted = down_convert(recieved_sig_vals, f_c, T, num_samples, 'cos')
@@ -19,14 +19,14 @@ def main():
     Q_down_converted = down_convert(recieved_sig_vals, f_c, T, num_samples, 'sin')
 
     #plotting dbg
-    plot_I_down_converted = plot_signal_and_fft(I_down_converted, num_samples, T)
-    plot_Q_down_converted = plot_signal_and_fft(Q_down_converted, num_samples, T)
+    #plot_I_down_converted = plot_signal_and_fft(I_down_converted, num_samples, T)
+    #plot_Q_down_converted = plot_signal_and_fft(Q_down_converted, num_samples, T)
     #done dbg
 
     #Low pass filter
     f_cutoff = 5.1
     f_s = 100
-    order = 20
+    order = 1
 
     """
     lpf = create_lpf(f_cutoff, f_s, order)
@@ -43,15 +43,15 @@ def main():
     Q_filtered = ifft(Q_filtered_fft)
     
     #multiply by two since amplitude is halved after filtration
-    for i in range(len(I_filtered)): 
-        I_filtered[i] *= 2
-        Q_filtered[i] *= 2
+    #for i in range(len(I_filtered)): 
+        #I_filtered[i] *= 2
+        #Q_filtered[i] *= 2
         
         
 
     #plotting dbg
-    plot_I_filtered = plot_signal_and_fft(I_filtered, num_samples, T)
-    plot_Q_filtered = plot_signal_and_fft(Q_filtered, num_samples, T)
+    #plot_I_filtered = plot_signal_and_fft(I_filtered, num_samples, T)
+    #plot_Q_filtered = plot_signal_and_fft(Q_filtered, num_samples, T)
     #done dbg
 
     #Downsample
@@ -62,21 +62,21 @@ def main():
     Q_downsampled = downsample(Q_filtered, sym_transmission_freq)
 
     #plotting dbg
-    plot_I_down_sampled = plot_signal_and_fft(I_downsampled, int(num_samples/10), T*10)
-    plot_Q_down_sampled = plot_signal_and_fft(Q_downsampled, int(num_samples/10), T*10)
+    #plot_I_down_sampled = plot_signal_and_fft(I_downsampled, int(num_samples/10), T*10)
+    #plot_Q_down_sampled = plot_signal_and_fft(Q_downsampled, int(num_samples/10), T*10)
     #show_plots()
     #done dbg
 
     #Correlate 
     n = 251
     start_index = correlate(I_downsampled, Q_downsampled, 'preamble.txt', n)
-    if start_index == -1: 
-        print("Error: not correlated properly")
-        return -1
+    if start_index == 0: 
+        print("Error: not correlated properly, preamble not found")
+        #return -1
 
     #Extract bits from singals
     num_samples = 300 - start_index 
-    bits = demodulate(I_downsampled[start_index:], Q_downsampled[start_index:], num_samples)
+    bits = demodulate(I_downsampled, Q_downsampled, num_samples, start_index)
 
     #Translate bits to ascii
     rtn_txt = 'NOT THE TEXT'
@@ -84,7 +84,7 @@ def main():
         rtn_txt = ascii_to_text(bits)
     else: 
         print("Error: bits not correctly demodulated (not an ascii val)")
-        return -1
+        #return -1
 
     print(rtn_txt)
     return rtn_txt

@@ -91,7 +91,7 @@ def five_sig_figs(x, sig = 5):
 #Output: index of the last byte of the preamble else if no match -1
 def correlate(I_signal_array, Q_signal_array, preamble, n): 
     preamble_array = read_file_str(preamble)
-    start_index = -1
+    start_index = 0
     restart_index = 0
     preamble_index = 0
     i = 0
@@ -132,7 +132,9 @@ def correlate(I_signal_array, Q_signal_array, preamble, n):
 #Demodulate: assign bit values based off signal values (QAM16)     
 #Input: I and Q as float arrays, int num_samples
 #Output: string array of bits, each element has 8 bits
-def demodulate(I_signal_array, Q_signal_array, num_samples):
+def demodulate(I_signal_array, Q_signal_array, num_samples, start_index):
+    cut_I_sig_arr = I_signal_array[start_index:]
+    cut_Q_sig_arr = Q_signal_array[start_index:]
     bits = []
     for i in range(num_samples):
         bit1 = -1
