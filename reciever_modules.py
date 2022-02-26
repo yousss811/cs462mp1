@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.fft import fft, fftfreq 
+from scipy.fft import fft, ifft, fftfreq 
 from scipy.signal import butter, lfilter
 
 #Reads every line in the file and returns each line as an element in an array 
@@ -46,6 +46,31 @@ def apply_lpf(signal_array, lpf):
     lpf_denominator = [lpf[i][1] for i in range(len(lpf))]
     return lfilter(lpf_numerator, lpf_denominator, signal_array)
 
+#!!!  NOT USED !!!
+#Zero out all values not in frequency range +/- f_cuttoff in fft graph
+#Input: fft of signal as float array
+#Output: filtered fft of signal as float array
+def zero_out(signal_array, f_c, f_s, num_samples, T): 
+    frequencies = fftfreq(num_samples, T)
+    signal_array_filtered = []
+    for i in range(num_samples): 
+
+
+        if i<(num_samples/2): 
+            curr_freq = f_s * frequencies[i]
+        else: 
+            curr_freq = f_s * (i - num_samples)
+
+
+        if abs(curr_freq) < f_c : 
+            signal_array_filtered.append(0)
+        else: 
+            signal_array_filtered.append(signal_array[i])
+    return signal_array_filtered
+
+
+        
+
 #Downsample a signal to symbol transmission frequency
 #Input: symbol transmission freq in Hz as int, signal as float array
 #Output: downsampled signal as float array 
@@ -63,17 +88,46 @@ def five_sig_figs(x, sig = 5):
 
 #Correlate: check first n samples vs provided pre-amble
 #Input: I and Q signals as float arrays, pre-amble as string array, int num samples to check
-#Output: bool - true if matching else false
+#Output: index of the last byte of the preamble else if no match -1
 def correlate(I_signal_array, Q_signal_array, preamble, n): 
     preamble_array = read_file_str(preamble)
-    for i in range(n-1): 
+    start_index = -1
+    restart_index = 0
+    preamble_index = 0
+    i = 0
+    while i < n: 
+        #create string of complex num using I and Q
+        if Q_signal_array[i] < 0: 
+            IQstr = '{}{}i'.format(five_sig_figs(I_signal_array[i]), five_sig_figs(Q_signal_array[i]))
+        else: 
+            IQstr = '{}+{}i'.format(five_sig_figs(I_signal_array[i]), five_sig_figs(Q_signal_array[i]))
+
+        if five_sig_figs(I_signal_array[i]) == .48284: 
+            print("OK WTF")
+        if IQstr == preamble_array[preamble_index]: 
+            preamble_index +=1
+            if preamble_index == 1: 
+                restart_index = i
+            if preamble_index == 50: 
+                start_index = i 
+                break
+        elif preamble_index > 0: 
+            preamble_index = 0
+            i = restart_index
+        i += 1
+
+
+        
+
+        """
         if Q_signal_array[i] < 0: 
             IQstr = '{}{}i'.format(five_sig_figs(I_signal_array[i], Q_signal_array[i]))
         else: 
             IQstr = '{}+{}i'.format(five_sig_figs(I_signal_array[i]), five_sig_figs(Q_signal_array[i]))
         if IQstr != preamble_array[i]: 
             return False
-    return True
+        """
+    return start_index
 
 #Demodulate: assign bit values based off signal values (QAM16)     
 #Input: I and Q as float arrays, int num_samples
@@ -123,7 +177,13 @@ def ascii_to_text(bit_array):
     return ascii_text
 
 #Plot a signal and its fft
+def init_plots():
+    global curr_num_graphs
+    curr_num_graphs = 0
 def plot_signal_and_fft(signal_as_array, num_samples, T): 
+    global curr_num_graphs
+    curr_plt = plt.figure(curr_num_graphs+1)
+    curr_num_graphs += 1
     plt.subplot(1,2,1)
     plt.plot(signal_as_array, 'r')
     plt.subplot(1,2,2)
@@ -131,16 +191,9 @@ def plot_signal_and_fft(signal_as_array, num_samples, T):
     frequencies = fftfreq(num_samples, T)
     plt.plot(frequencies, signal_fft, 'b')
 
+    return curr_plt
+def show_plots(): 
     plt.show()
 
-
-#plot2 = plt.figure(2)
-#plt.subplot(2,2,1)
-#plt.plot(I, 'r')
-#plt.subplot(2,2,2)
-#plt.plot(fft(I), 'b')
-#plt.subplot(2,2,3)
-#w1, h1 = freqz(I)
-#plt.plot(w1, 20*np.log10(np.abs(h1)), 'g')
 
 
